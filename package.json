@@ -1,0 +1,14 @@
+{
+  "name": "abri-pro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Abri Pro: the marketing hub for home service contractors. Roadmap, campaigns, ideas, social calendar, monthly numbers, files and Agency drafts.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.45.0"
+  }
+}

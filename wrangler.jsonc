@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // The public demo: Acme Air, a made-up contractor. Resets itself every night.
+  "name": "abri-demo",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "vars": { "DEMO": "1" },
+  // Wrangler creates these on first deploy (automatic provisioning, wrangler 4.45+)
+  "d1_databases": [{ "binding": "DB", "database_name": "abri-demo" }],
+  "kv_namespaces": [{ "binding": "FILES" }],
+  // 3:15 AM Eastern (08:15 UTC): wipe the demo and seed Acme Air again with fresh dates.
+  "triggers": { "crons": ["15 8 * * *"] },
+  "routes": [{ "pattern": "demo.abripro.app", "custom_domain": true }],
+  "observability": { "enabled": true }
+}

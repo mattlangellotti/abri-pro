@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 150" role="img" aria-label="Acme Air">
+  <circle cx="75" cy="75" r="62" fill="#12355B"/>
+  <path d="M38 62c14-12 30-12 44 0s30 12 44 0" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+  <path d="M38 88c14-12 30-12 44 0s30 12 44 0" fill="none" stroke="#C2410C" stroke-width="9" stroke-linecap="round"/>
+  <text x="158" y="86" font-family="Helvetica Neue, Arial, sans-serif" font-size="64" font-weight="800" letter-spacing="-1" fill="#12355B">ACME AIR</text>
+  <text x="161" y="118" font-family="Helvetica Neue, Arial, sans-serif" font-size="19" font-weight="700" letter-spacing="5" fill="#C2410C">HEATING &amp; COOLING</text>
+</svg>
