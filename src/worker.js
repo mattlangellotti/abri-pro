@@ -14,7 +14,7 @@ const SESSION_DAYS = 60;
 const MAX_UPLOAD = 20 * 1024 * 1024;
 const MAX_BIG_UPLOAD = 95 * 1024 * 1024;
 const INLINE_TYPES = /^(image\/(png|jpe?g|gif|webp)|application\/pdf|video\/(mp4|quicktime|webm)|audio\/(mpeg|mp4|x-m4a))$/;
-const PUBLIC_PATHS = new Set(['/app.css', '/favicon.svg', '/manifest.webmanifest', '/img/icon-180.png', '/img/icon-512.png', '/img/acme-logo.svg', '/img/abri-mark.svg']);
+const PUBLIC_PATHS = new Set(['/app.css', '/landing.css', '/landing.js', '/favicon.svg', '/manifest.webmanifest', '/img/icon-180.png', '/img/icon-512.png', '/img/acme-logo.svg', '/img/abri-mark.svg']);
 const DEMO_MAX_UPLOAD = 5 * 1024 * 1024;
 const isDemo = (env) => env.DEMO === '1';
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -906,6 +906,7 @@ ${role('overview', 'Field tech', 'Tony Russo', 'Sees the plan and adds ideas fro
 </form>
 <p class="so-help">First time here? Use the invite link your admin sent you. Forgot your password? Ask your admin for a reset link.</p>`;
   }
+  if (demo) return demoLanding(env, brand, message);
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>${demo ? 'Abri Pro demo' : 'Sign in · ' + clean(brand.name)}</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/img/icon-180.png"><link rel="manifest" href="/manifest.webmanifest">
@@ -913,5 +914,82 @@ ${role('overview', 'Field tech', 'Tony Russo', 'Sees the plan and adds ideas fro
 <body class="signed-out"><main class="so-card${demo ? ' so-wide' : ''}">${body}
 <div class="so-foot"><img src="/img/abri-mark.svg" alt="" width="18" height="18">Abri Pro</div>
 </main></body></html>`;
+  return new Response(html, { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Frame-Options': 'DENY' } });
+}
+
+// ---------- demo landing ----------
+// Pick a seat on the left; the window on the right shows what that person sees, with the demo's real numbers.
+async function demoLanding(env, brand, message) {
+  const clean = (v) => String(v || '').replace(/[<>&"']/g, '');
+  const latest = await env.DB.prepare(`SELECT month FROM monthly WHERE is_sample IN (0, 1) GROUP BY month ORDER BY month DESC LIMIT 1`).first().catch(() => null);
+  let stats = { month: '', leads: 0, jobs: 0, revenue: 0, change: null };
+  if (latest) {
+    const [y, mo] = latest.month.split('-').map(Number);
+    const prevKey = `${y - 1}-${String(mo).padStart(2, '0')}`;
+    const sum = async (m) => env.DB.prepare(`SELECT COALESCE(SUM(leads),0) AS leads, COALESCE(SUM(jobs),0) AS jobs, COALESCE(SUM(revenue),0) AS revenue FROM monthly WHERE month = ? AND division IN ('install','service')`).bind(m).first();
+    const cur = await sum(latest.month), prev = await sum(prevKey);
+    stats = { month: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][mo - 1], leads: cur.leads, jobs: cur.jobs, revenue: cur.revenue, change: prev.leads ? Math.round(((cur.leads - prev.leads) / prev.leads) * 100) : null };
+  }
+  const drafts = (await env.DB.prepare(`SELECT (SELECT COUNT(*) FROM content WHERE status = 'draft') + (SELECT COUNT(*) FROM posts WHERE status = 'draft' AND origin IS NOT NULL AND origin <> 'person') AS n`).first().catch(() => ({ n: 0 }))).n;
+  const ideas = (await env.DB.prepare(`SELECT COUNT(*) AS n FROM ideas WHERE status IN ('new','considering')`).first().catch(() => ({ n: 0 }))).n;
+  const money = (n) => n >= 1e4 ? '$' + Math.round(n / 1e3) + 'K' : '$' + Number(n).toLocaleString('en-US');
+
+  const seats = [
+    { role: 'full', initials: 'FA', title: 'Owner', who: 'Frank Acosta', text: 'Sees every number and approves what goes out.', pages: 8, action: drafts ? `Review ${drafts} Agency draft${drafts === 1 ? '' : 's'}` : 'Review Agency drafts' },
+    { role: 'admin', initials: 'DR', title: 'Marketing lead', who: 'Dana Reyes', text: 'Runs the hub, invites the team, sets who sees what.', pages: 9, action: 'Invite your team' },
+    { role: 'team', initials: 'PS', title: 'Office staff', who: 'Priya Shah', text: 'Submits posts for approval and keeps the invoices.', pages: 8, action: 'Submit a post' },
+    { role: 'overview', initials: 'TR', title: 'Field tech', who: 'Tony Russo', text: 'Checks the plan and drops ideas from the truck.', pages: 3, action: `Add an idea (${ideas} open)` }
+  ];
+  const tabs = [['Home', 1], ['Roadmap', 1], ['Campaigns', 2], ['Ideas', 1], ['Social', 2], ['Content', 2], ['Monthly numbers', 2], ['Files', 2], ['People', 4]];
+  const rank = { overview: 1, team: 2, full: 3, admin: 4 };
+  const seatData = Object.fromEntries(seats.map((x) => [x.role, { who: x.who.split(' ')[0], pages: tabs.filter((t) => rank[x.role] >= t[1]).map((t) => t[0]), action: x.action }]));
+  const chevron = '<svg class="seat-go" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Try Abri Pro with ${clean(brand.name)}</title>
+<meta name="description" content="Try the Abri Pro marketing hub as a made-up contractor. No sign-up.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/img/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap">
+<link rel="stylesheet" href="/landing.css"></head>
+<body class="ld">
+<header class="ld-top"><img src="${brand.logo || '/img/acme-logo.svg'}" alt="${clean(brand.name)}" class="ld-logo"><span class="ld-note">A made-up company. Everything resets at night.</span></header>
+<main class="ld-main">
+  <section class="ld-pick" aria-labelledby="ld-h">
+    <h1 id="ld-h">See your marketing on one screen.</h1>
+    <p class="ld-lede">This is Abri Pro running for ${clean(brand.name)}, a pretend heating and cooling company. Pick a seat. No sign-up, no password.</p>
+    ${message ? `<p class="ld-msg" role="alert">${clean(message)}</p>` : ''}
+    <form method="post" action="/demo/enter" class="seats">
+      ${seats.map((x, i) => `<button class="seat${i === 0 ? ' is-on' : ''}" name="role" value="${x.role}" data-seat="${x.role}">
+        <span class="seat-av seat-av-${x.role}" aria-hidden="true">${x.initials}</span>
+        <span class="seat-txt"><span class="seat-t">${x.title}<span class="seat-who">${x.who}</span></span><span class="seat-d">${x.text}</span></span>${chevron}</button>`).join('')}
+    </form>
+  </section>
+  <section class="ld-peek" aria-label="What this seat sees">
+    <div class="win" id="win">
+      <div class="win-bar"><span></span><span></span><span></span></div>
+      <div class="win-body">
+        <nav class="win-nav" aria-hidden="true">${tabs.map((t) => `<span class="wt" data-tab="${t[0]}">${t[0]}</span>`).join('')}</nav>
+        <div class="win-main">
+          <div class="win-hi">Good morning, <span id="win-who">Frank</span>.</div>
+          <div class="win-kpis" id="win-kpis">
+            <div class="kpi"><span class="kpi-l">Leads in ${stats.month}</span><span class="kpi-n">${stats.leads}</span>${stats.change != null ? `<span class="kpi-c${stats.change < 0 ? ' down' : ''}">${stats.change >= 0 ? '+' : '−'}${Math.abs(stats.change)}% on last year</span>` : ''}</div>
+            <div class="kpi"><span class="kpi-l">Booked jobs</span><span class="kpi-n">${stats.jobs}</span></div>
+            <div class="kpi kpi-money"><span class="kpi-l">Revenue</span><span class="kpi-n">${money(stats.revenue)}</span></div>
+          </div>
+          <svg class="win-chart" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true">
+            <polyline class="ln-prev" points="0,62 27,64 54,60 81,54 108,44 135,30 162,22 189,26 216,40 243,50 270,54 300,58"/>
+            <polyline class="ln-cur" points="0,56 27,58 54,52 81,46 108,36 135,22 162,12 189,16 216,30 243,40 270,44"/>
+          </svg>
+          <div class="win-act" id="win-act">${clean(seats[0].action)}</div>
+        </div>
+      </div>
+    </div>
+    <p class="peek-cap" id="peek-cap" aria-live="polite">Frank sees 8 of 9 pages. Only the marketing lead manages people.</p>
+  </section>
+</main>
+<footer class="ld-foot"><img src="/img/abri-mark.svg" alt="" width="20" height="20">Abri Pro, the marketing hub for home service contractors</footer>
+<script id="seat-data" type="application/json">${JSON.stringify(seatData).replace(/</g, '\\u003c')}</script>
+<script src="/landing.js" defer></script>
+</body></html>`;
   return new Response(html, { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Frame-Options': 'DENY' } });
 }

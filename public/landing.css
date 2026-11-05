@@ -1,0 +1,102 @@
+/* Abri Pro demo landing. One family (Bricolage Grotesque), Acme Air's navy and orange. */
+:root{
+  --navy:#12355B;      /* Acme main */
+  --night:#0B2340;     /* headings */
+  --orange:#C2410C;    /* Acme accent, actions */
+  --air:#E8EFF6;       /* soft fills */
+  --line:#D5DFEA;      /* row borders */
+  --steel:#55657A;     /* body copy */
+  --white:#FFFFFF;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body.ld{
+  min-height:100vh;background:var(--white);color:var(--night);
+  font-family:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;font-optical-sizing:auto;
+  -webkit-font-smoothing:antialiased;
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  grid-template-rows:auto 1fr auto;grid-template-areas:"top peek" "pick peek" "foot peek";
+}
+.ld-main{display:contents}
+
+/* left column */
+.ld-top{grid-area:top;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:32px clamp(24px,5vw,72px) 0}
+.ld-logo{height:44px;width:auto;display:block}
+.ld-note{font-size:14px;color:var(--steel)}
+.ld-pick{grid-area:pick;align-self:center;padding:48px clamp(24px,5vw,72px);max-width:680px;width:100%;justify-self:end}
+.ld-pick h1{font-size:clamp(42px,5.4vw,72px);line-height:0.98;font-weight:750;letter-spacing:-0.035em;margin:0 0 20px;font-variation-settings:"opsz" 96;max-width:11ch}
+.ld-lede{font-size:19px;line-height:1.5;color:var(--steel);margin:0 0 32px;max-width:44ch}
+.ld-msg{background:#FDEDE6;color:#8A2E08;border-radius:12px;padding:10px 14px;font-size:15px;margin:0 0 20px}
+
+.seats{display:flex;flex-direction:column;gap:12px;margin:0}
+.seat{
+  display:flex;align-items:center;gap:16px;width:100%;padding:14px 18px 14px 14px;min-height:80px;
+  border:1.5px solid var(--line);border-radius:20px;background:var(--white);color:inherit;font:inherit;text-align:left;cursor:pointer;
+  transition:border-color .2s ease,background-color .2s ease,transform .15s ease;
+}
+.seat:hover,.seat.is-on{border-color:var(--navy);background:#F4F8FB}
+.seat:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.seat:active{transform:scale(0.985)}
+.seat-av{flex:none;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:16px;letter-spacing:0.02em}
+.seat-av-full{background:var(--navy)}
+.seat-av-admin{background:var(--orange)}
+.seat-av-team{background:#0F766E}
+.seat-av-overview{background:#4B5A6E}
+.seat-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.seat-t{font-size:19px;font-weight:700;letter-spacing:-0.01em;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.seat-who{font-size:14px;font-weight:500;color:var(--steel)}
+.seat-d{font-size:15px;line-height:1.35;color:var(--steel)}
+.seat-go{flex:none;color:#9AA8B8;transition:color .2s ease,transform .2s ease}
+.seat:hover .seat-go,.seat.is-on .seat-go{color:var(--orange);transform:translateX(3px)}
+
+.ld-foot{grid-area:foot;display:flex;align-items:center;gap:10px;padding:0 clamp(24px,5vw,72px) 28px;font-size:14px;color:var(--steel)}
+
+/* right column: the window */
+.ld-peek{grid-area:peek;background:var(--navy);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:22px;padding:56px clamp(24px,4vw,64px);position:relative;overflow:hidden}
+.ld-peek::before{content:"";position:absolute;inset:auto -20% -38% -20%;height:70%;border-radius:50%;background:#1A4572;opacity:.6;pointer-events:none}
+.win{position:relative;width:100%;max-width:560px;background:var(--white);border-radius:18px;box-shadow:0 30px 70px rgba(4,18,36,.45);overflow:hidden}
+.win-bar{display:flex;gap:7px;padding:12px 14px;background:#F1F4F8;border-bottom:1px solid #E3E9F0}
+.win-bar span{width:11px;height:11px;border-radius:50%;background:#C9D3DE}
+.win-body{display:grid;grid-template-columns:148px 1fr;min-height:330px}
+.win-nav{display:flex;flex-direction:column;gap:3px;padding:14px 10px;border-right:1px solid #EEF2F6}
+.wt{white-space:nowrap;font-size:12.5px;font-weight:600;padding:7px 10px;border-radius:9px;color:#3A4A5E;transition:opacity .3s ease,color .3s ease}
+.wt:first-child{background:var(--navy);color:#fff}
+.wt.off{opacity:.22;text-decoration:line-through;text-decoration-thickness:1.5px}
+.win-main{padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.win-hi{font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.win-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{border:1px solid #E6ECF2;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi-l{font-size:11.5px;color:var(--steel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-n{font-size:26px;font-weight:750;letter-spacing:-0.03em}
+.kpi-c{font-size:11px;font-weight:600;color:#1E6B34}
+.kpi-c.down{color:#8A2E08}
+.win-chart{width:100%;height:84px;display:block}
+.win-chart polyline{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.ln-prev{stroke:#C4CDD8;stroke-width:2.5}
+.ln-cur{stroke:var(--orange);stroke-width:3.5;stroke-dasharray:600;stroke-dashoffset:600;animation:draw 1.6s .3s cubic-bezier(.3,.7,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.win-act{align-self:flex-start;background:var(--orange);color:#fff;font-size:13.5px;font-weight:650;padding:9px 16px;border-radius:999px}
+.peek-cap{position:relative;margin:0;max-width:520px;text-align:center;color:#D7E3F0;font-size:16px;line-height:1.45;min-height:3em}
+
+@media (max-width:960px){
+  body.ld{grid-template-columns:1fr;grid-template-rows:auto auto auto auto;grid-template-areas:"top" "pick" "peek" "foot"}
+  .ld-pick{justify-self:start;max-width:none;padding-top:32px;padding-bottom:40px}
+  .ld-peek{padding:40px 20px 44px}
+  .ld-foot{padding-top:24px}
+}
+@media (max-width:560px){
+  .ld-top{padding-top:22px}
+  .ld-logo{height:36px}
+  .ld-note{font-size:13px}
+  .ld-lede{font-size:17px;margin-bottom:24px}
+  .seat{min-height:72px;padding:12px 14px 12px 12px;gap:12px}
+  .seat-av{width:44px;height:44px;font-size:15px}
+  .seat-t{font-size:17px}
+  .seat-d{font-size:14px}
+  .win-body{grid-template-columns:1fr}
+  .win-nav{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid #EEF2F6;padding:10px}
+  .wt{padding:5px 8px;font-size:11.5px}
+  .kpi-n{font-size:21px}
+  .kpi-l{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}.ln-cur{stroke-dashoffset:0}}
